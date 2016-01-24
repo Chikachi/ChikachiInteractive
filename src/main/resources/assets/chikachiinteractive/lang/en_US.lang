@@ -1,0 +1,30 @@
+chat.ChikachiInteractive.give=You just received %s %s!
+
+chat.ChikachiInteractive.random=You just received a random item! It was %s %s!
+
+chat.ChikachiInteractive.reload.success=Reloaded config
+chat.ChikachiInteractive.reload.error=Something happened while reloading config! - Look at console for details.
+
+chat.ChikachiInteractive.save.success=Saved config
+chat.ChikachiInteractive.save.error=Something happened while saving config! - Look at console for details.
+
+chat.ChikachiInteractive.start.success=Started Tetris Interaction
+chat.ChikachiInteractive.start.error=Something happened while trying to start! - Look at console for details.
+chat.ChikachiInteractive.start.alreadyOpen=Already started
+
+chat.ChikachiInteractive.status=Status on Tetris connection : %s
+chat.ChikachiInteractive.status.connecting=Connecting
+chat.ChikachiInteractive.status.open=Connected
+chat.ChikachiInteractive.status.closing=Closing
+chat.ChikachiInteractive.status.closed=Not Connected
+
+chat.ChikachiInteractive.stop.success=Stopped Tetris Interaction
+chat.ChikachiInteractive.stop.error=Something happened while trying to stop! - Look at console for details.
+chat.ChikachiInteractive.stop.notConnected=Already stopped
+
+chat.ChikachiInteractive.test.usage=/chikachi interactive test {code}
+
+msg.ChikachiInteractive.kick=You got kicked by your viewers!
+msg.ChikachiInteractive.deleteWorld.kick=Your world got deleted!
+
+msg.ChikachiInteractive.niy=Not implemented yet!

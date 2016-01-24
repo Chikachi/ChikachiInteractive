@@ -1,0 +1,17 @@
+[{
+  "modid" : "ChikachiInteractive",
+  "name" : "Chikachi's Beam Interaction",
+  "version" : "${version}",
+  "mcversion": "${mcversion}",
+  "url" : "",
+  "credits" : "",
+  "authors": [
+    "Chikachi"
+  ],
+  "description": "Chikachi's Beam Interaction",
+  "logoFile" : "",
+  "updateUrl" : "",
+  "parent" : "",
+  "screenshots": [
+  ]
+}]

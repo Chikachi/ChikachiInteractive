@@ -1,0 +1,115 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+    }
+}
+repositories {
+    ivy {
+        name "CurseForge"
+        artifactPattern 'http://addons-origin.cursecdn.com/files/[organisation]/[module]-[revision].[ext]'
+    }
+}
+
+apply plugin: 'forge'
+
+def mcVersion = "1.7.10"
+def forgeVersion = "10.13.4.1558"
+
+version = mcVersion + "-0.1.0"
+group = "chikachi.interactive" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "ChikachiInteractive"
+
+minecraft {
+    version = mcVersion + "-" + forgeVersion + "-" + mcVersion
+    if (file('../run').exists()) {
+        runDir = "../run"
+    } else {
+        runDir = "run"
+    }
+}
+
+def printDebug(message) {
+    println "[" + archivesBaseName + "] " + message
+}
+
+class CurseForgeDependencyInfo {
+    public String module, version, ext;
+    private String fileid;
+
+    public CurseForgeDependencyInfo(String module, String version, String ext, String fileid) {
+        this.module = module;
+        this.version = version;
+        this.ext = ext;
+        this.fileid = fileid;
+    }
+
+    public String GetFileId() {
+        return Integer.parseInt(fileid.substring(0, 4)) + "/" + Integer.parseInt(fileid.substring(4));
+    }
+}
+
+List<CurseForgeDependencyInfo> curseForgeDependencies = new ArrayList<CurseForgeDependencyInfo>();
+curseForgeDependencies.add(new CurseForgeDependencyInfo("ChikachiLib", "1.7.10-0.1.0", "jar", "2269757"));
+
+curseForgeDependencies.add(new CurseForgeDependencyInfo("ChanceCubes", "1.7.10-1.5.4.54", "jar", "2272297"));
+curseForgeDependencies.add(new CurseForgeDependencyInfo("PandorasBox", "2.1", "jar", "2221627"));
+
+dependencies {
+    // you may put jars on which you depend on in ./libs
+    // or you may define them like so..
+    //compile "some.group:artifact:version:classifier"
+    //compile "some.group:artifact:version"
+      
+    // real examples
+    //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
+    //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+
+    // for more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+    for (CurseForgeDependencyInfo dependency : curseForgeDependencies) {
+        if (file("../" + dependency.module).exists()) {
+            printDebug "Using local " + dependency.module + " project"
+            compile project(":" + dependency.module)
+            continue;
+        }
+        if (file("./" + dependency.module + ".jar").exists()) {
+            printDebug "Using local " + dependency.module + " compiled jar"
+            compile files("./" + dependency.module + ".jar")
+            continue;
+        }
+        compile group: dependency.GetFileId(), name: dependency.module, version: dependency.version, ext: dependency.ext
+    }
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        // replace version and mcversion
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+idea { module { inheritOutputDirs = true } }

@@ -1,0 +1,45 @@
+{
+  "http": {
+    "uri": "https://beam.pro/api/v1/",
+    "username": "",
+    "password": ""
+  },
+  "users": [
+    {
+      "beam": {
+        "username": "Chikachi",
+        "password": "hidden",
+        "2fa": "",
+        "cid": 244
+      },
+      "ign": "TAT",
+      "actions": [
+        {
+          "input": {
+            "code": 0
+          },
+          "action": "chikachi.interactive.common.action.implementation.ActionGive",
+          "data": {
+            "item": "chancecubes:Compact_Giant_Chance_Cube",
+            "amount": 1
+          }
+        },
+        {
+          "input": {
+            "code": 1
+          },
+          "action": "chikachi.interactive.common.action.implementation.ActionHeal",
+          "data": {
+            "saturation": false
+          }
+        },
+        {
+          "input": {
+            "code": 2
+          },
+          "action": "chikachi.interactive.common.action.implementation.ActionDeleteWorld"
+        }
+      ]
+    }
+  ]
+}
