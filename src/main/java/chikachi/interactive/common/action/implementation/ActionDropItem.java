@@ -4,6 +4,7 @@ import chikachi.interactive.ChikachiInteractive;
 import chikachi.interactive.common.action.ActionBase;
 import chikachi.lib.common.utils.MapUtils;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,5 +78,26 @@ public class ActionDropItem extends ActionBase {
         }
 
         return true;
+    }
+
+    @Override
+    public String getGuiText() {
+        return "Drop Item (" + this.type + ")";
+    }
+
+    @Override
+    public NBTTagCompound toNBT() {
+        NBTTagCompound tagCompound = super.toNBT();
+
+        tagCompound.setString("type", this.type);
+
+        return tagCompound;
+    }
+
+    @Override
+    protected void fromNBT(NBTTagCompound tagCompound) {
+        super.fromNBT(tagCompound);
+
+        this.type = tagCompound.getString("type");
     }
 }

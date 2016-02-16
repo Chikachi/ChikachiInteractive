@@ -6,12 +6,13 @@ import chikachi.lib.common.utils.MapUtils;
 import chikachi.lib.common.utils.PlayerUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.DimensionManager;
 
 import java.util.HashMap;
 
 // FIXME: Fix this!
-public class ActionTeleportDimension extends ActionBase {
+public class ActionTeleport extends ActionBase {
     private int dimension = 0;
     private boolean specificPosition = false;
     private int x;
@@ -48,5 +49,25 @@ public class ActionTeleportDimension extends ActionBase {
         }
 
         return true;
+    }
+
+    @Override
+    public String getGuiText() {
+        return "Teleport (" + (this.specificPosition ? this.x + "," + this.y + "," + this.z : "Spawn") + " in dimension " + this.dimension + ")";
+    }
+
+    @Override
+    public NBTTagCompound toNBT() {
+        NBTTagCompound tagCompound = super.toNBT();
+
+        tagCompound.setInteger("dimension", this.dimension);
+        tagCompound.setBoolean("specificPosition", this.specificPosition);
+        if (this.specificPosition) {
+            tagCompound.setInteger("x", this.x);
+            tagCompound.setInteger("y", this.y);
+            tagCompound.setInteger("z", this.z);
+        }
+
+        return tagCompound;
     }
 }

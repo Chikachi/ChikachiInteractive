@@ -1,33 +1,31 @@
 package chikachi.interactive;
 
-import chikachi.interactive.common.Blacklist;
 import chikachi.interactive.common.CommonProxy;
 import chikachi.interactive.common.Constants;
+import chikachi.interactive.common.GuiHandler;
 import chikachi.interactive.common.action.ActionManager;
 import chikachi.interactive.common.command.CommandChikachiInteractive;
 import chikachi.interactive.common.tetris.TetrisForgeConnector;
 import chikachi.lib.ChikachiLib;
 import chikachi.lib.common.utils.JsonUtils;
+import chikachi.lib.common.utils.ReflectionUtils;
 import com.google.gson.stream.JsonWriter;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import net.minecraft.item.Item;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import cpw.mods.fml.common.event.*;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraft.nbt.NBTTagCompound;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import pro.beam.interactive.robot.Robot;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+
+// TODO: Register Actions with IMC to allow for short Action names in the config file and selectable in GUI
+// Make sure that actions have been registered before loading the config file as addon actions needs to be registered for it to load them.
 
 @SuppressWarnings("unused")
 @Mod(modid = Constants.MODID, name = Constants.MODNAME, version = Constants.VERSION, dependencies = "required-after:ChikachiLib;after:chancecubes;after:pandorasbox")
@@ -37,15 +35,15 @@ public class ChikachiInteractive {
     public static ChikachiInteractive instance;
 
     @SidedProxy(
-            clientSide = "chikachi.interactive.common.CommonProxy",
-            serverSide = "chikachi.interactive.common.CommonProxy"
+            clientSide = "chikachi.interactive.client.ClientProxy",
+            serverSide = "chikachi.interactive.server.ServerProxy"
     )
     public static CommonProxy proxy;
 
-    private static final Logger logger = LogManager.getLogger(Constants.MODID);
+    public static SimpleNetworkWrapper network;
 
-    public ActionManager manager;
-    public Robot robot;
+    private static final Logger logger = LogManager.getLogger(Constants.MODID);
+    private final GuiHandler guiHandler = new GuiHandler();
 
     private File configFile;
     public File actionConfigFile;
@@ -90,31 +88,12 @@ public class ChikachiInteractive {
 
                 JsonUtils.write(writer, "ign", "Steve");
 
-                // TODO: Add default blacklist
                 writer.name("blacklist");
                 writer.beginObject();
-                JsonUtils.write(writer, "mod", new String[]{
-                        "TConstruct"
-                });
-                JsonUtils.write(writer, "item", new String[]{
-                        "ChikachiTools:OPSword",
-                        "ThermalExpansion:capacitor:0",
-                        "chancecubes:creativePendant",
-                        "ExtraUtilities:nodeUpgrade:4",
-                        "Botania:pool:1",
-                        "Botania:buriedPetals",
-                        "Botania:manaFlame",
-                        "Botania:prism",
-                        "ThermalExpansion:meter:1",
-                        "ExtraUtilities:mini-soul",
-                        "ChikachiLib:Hammer.kick",
-                        "ChikachiLib:Hammer.ban",
-                        "ThermalExpansion:Strongbox:0",
-                        "ThermalExpansion:Cache:0",
-                        "ThermalExpansion:Tank:0",
-                        "ThermalExpansion:Cell:0",
-                        "ThermalExpansion:Sponge:0"
-                });
+                JsonUtils.write(writer, "mod", Constants.BLACKLIST_DEFAULT_MODS);
+                JsonUtils.write(writer, "item", Constants.BLACKLIST_DEFAULT_ITEMS);
+                JsonUtils.write(writer, "whitelist", Constants.BLACKLIST_DEFAULT_WHITELIST);
+                JsonUtils.write(writer, "chance", Constants.BLACKLIST_DEFAULT_CHANCE);
                 writer.endObject();
 
                 writer.name("actions");
@@ -145,13 +124,13 @@ public class ChikachiInteractive {
                 e.printStackTrace();
             }
         }
-
-        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @Mod.EventHandler
     public void onInit(FMLInitializationEvent event) {
         proxy.onInit();
+
+        NetworkRegistry.INSTANCE.registerGuiHandler(this, guiHandler);
     }
 
     @Mod.EventHandler
@@ -160,10 +139,33 @@ public class ChikachiInteractive {
     }
 
     @Mod.EventHandler
-    public void onServerLoad(FMLServerStartingEvent event) {
+    public void onServerStarting(FMLServerStartingEvent event) {
         ChikachiLib.commandHandler.RegisterSubCommandHandler(new CommandChikachiInteractive());
+    }
 
+    @Mod.EventHandler
+    public void onServerStarted(FMLServerStartedEvent event) {
         TetrisForgeConnector.getInstance().setConfig(this.configFile);
+    }
+
+    @Mod.EventHandler
+    public void imcReceived(FMLInterModComms.IMCEvent event) {
+        for (FMLInterModComms.IMCMessage message : event.getMessages()) {
+            if (message.key.equalsIgnoreCase("register-action")) {
+                if (message.isNBTMessage()) {
+                    NBTTagCompound tagCompound = message.getNBTValue();
+
+                    if (tagCompound.hasKey("key") && tagCompound.hasKey("class")) {
+                        String key = tagCompound.getString("key");
+                        String actionClass = tagCompound.getString("class");
+
+                        if (ReflectionUtils.GetClass(actionClass) != null) {
+                            TetrisForgeConnector.registerAction(key, actionClass);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public static void Log(String message) {
@@ -172,16 +174,5 @@ public class ChikachiInteractive {
 
     public static void Log(String message, boolean warning) {
         logger.log(warning ? Level.WARN : Level.INFO, "[" + Constants.VERSION + "] " + message);
-    }
-
-    @SuppressWarnings("unused")
-    @SubscribeEvent
-    public void onTooltip(ItemTooltipEvent event) {
-        if (event.itemStack.getItem() != null) {
-            String itemName = Item.itemRegistry.getNameForObject(event.itemStack.getItem());
-            if (itemName != null && Blacklist.isBlacklisted(itemName, event.itemStack.getItemDamage())) {
-                event.toolTip.add(EnumChatFormatting.DARK_RED + "BLACKLISTED");
-            }
-        }
     }
 }

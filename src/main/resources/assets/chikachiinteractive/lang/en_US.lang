@@ -22,7 +22,8 @@ chat.ChikachiInteractive.stop.success=Stopped Tetris Interaction
 chat.ChikachiInteractive.stop.error=Something happened while trying to stop! - Look at console for details.
 chat.ChikachiInteractive.stop.notConnected=Already stopped
 
-chat.ChikachiInteractive.test.usage=/chikachi interactive test {code}
+chat.ChikachiInteractive.test=Test!
+chat.ChikachiInteractive.test.usage=/chikachi interactive test {code} {times}
 
 msg.ChikachiInteractive.kick=You got kicked by your viewers!
 msg.ChikachiInteractive.deleteWorld.kick=Your world got deleted!

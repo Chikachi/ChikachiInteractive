@@ -4,6 +4,7 @@ import chikachi.interactive.ChikachiInteractive;
 import chikachi.interactive.common.action.ActionBasePotion;
 import chikachi.lib.common.utils.MapUtils;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 
@@ -40,5 +41,26 @@ public class ActionPotion extends ActionBasePotion {
         }
 
         return true;
+    }
+
+    @Override
+    public String getGuiText() {
+        return "Give Potion Effect (" + Potion.potionTypes[this.potionId].getName() + " - " + this.duration + " seconds - " + this.amplifier + " amplifier)";
+    }
+
+    @Override
+    public NBTTagCompound toNBT() {
+        NBTTagCompound tagCompound = super.toNBT();
+
+        tagCompound.setInteger("id", this.potionId);
+
+        return tagCompound;
+    }
+
+    @Override
+    protected void fromNBT(NBTTagCompound tagCompound) {
+        super.fromNBT(tagCompound);
+
+        this.potionId = tagCompound.getInteger("id");
     }
 }

@@ -124,8 +124,8 @@ Summon an entity by the player.
 
 ----------
 
-### ActionTeleportDimension
-`chikachi.interactive.common.action.implementation.ActionTeleportDimension`<br>
+### ActionTeleport
+`chikachi.interactive.common.action.implementation.ActionTeleport`<br>
 Teleports the player to a dimension.<br>
 Will teleport to spawn point unless specific coordinates is set.<br>
 **NOTE:** Teleport to spawn in other dimensions than Overworld is not recommended.

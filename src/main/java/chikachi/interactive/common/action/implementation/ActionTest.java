@@ -16,4 +16,9 @@ public class ActionTest extends ActionBase {
     public boolean setData(HashMap<String, Object> data) {
         return true;
     }
+
+    @Override
+    public String getGuiText() {
+        return "Test";
+    }
 }

@@ -4,6 +4,25 @@
     "username": "",
     "password": ""
   },
+  "blacklist": {
+    "mod": [
+      "TConstruct"
+    ],
+    "item": [
+      "Botania:pool:1",
+      "chancecubes:creativePendant",
+      "ChikachiLib:Hammer.ban"
+    ],
+    "whitelist": [
+      "TConstruct:heartCanister",
+      "TConstruct:knapsack",
+      "TConstruct:diamondApple",
+      "TConstruct:jerky"
+    ],
+    "chance": {
+      "TConstruct:jerky:0": 30
+    }
+  },
   "users": [
     {
       "beam": {

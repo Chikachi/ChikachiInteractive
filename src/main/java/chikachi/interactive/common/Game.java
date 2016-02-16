@@ -1,11 +1,11 @@
 package chikachi.interactive.common;
 
+import chikachi.interactive.ChikachiInteractive;
 import chikachi.interactive.common.action.ActionBase;
 import chikachi.interactive.common.action.ActionManager;
 import chikachi.interactive.common.input.InputBase;
 import chikachi.interactive.common.tetris.TetrisForgeConnector;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
@@ -16,6 +16,7 @@ import pro.beam.api.services.impl.UsersService;
 import pro.beam.interactive.robot.Robot;
 import pro.beam.interactive.robot.RobotBuilder;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -67,24 +68,24 @@ public class Game {
     }
 
     public BeamUser getBeamUser() {
-        if (beamUserInstance == null) {
+        if (this.beamUserInstance == null) {
             BeamAPI beam = TetrisForgeConnector.getInstance().getBeam();
 
             CheckedFuture<BeamUser, BeamException> task;
-            if (twoFactor.length() == 6) {
-                task = beam.use(UsersService.class).login(username, password, twoFactor);
+            if (this.twoFactor != null && this.twoFactor.length() == 6) {
+                task = beam.use(UsersService.class).login(this.username, this.password, this.twoFactor);
             } else {
-                task = beam.use(UsersService.class).login(username, password);
+                task = beam.use(UsersService.class).login(this.username, this.password);
             }
 
             try {
-                beamUserInstance = task.checkedGet();
+                this.beamUserInstance = task.checkedGet();
             } catch (BeamException e) {
-                beamUserInstance = null;
+                this.beamUserInstance = null;
             }
         }
 
-        return beamUserInstance;
+        return this.beamUserInstance;
     }
 
     public Robot getRobotInstance() {
@@ -96,23 +97,37 @@ public class Game {
     }
 
     public Robot getRobot(boolean forceNewInstance) {
+        return getRobot(forceNewInstance, null);
+    }
+
+    public Robot getRobot(boolean forceNewInstance, String twoFactor) {
         if (forceNewInstance || this.robotInstance == null) {
             BeamAPI beam = TetrisForgeConnector.getInstance().getBeam();
             RobotBuilder builder = new RobotBuilder();
 
-            builder.username(username)
-                    .password(password)
-                    .channel(channelId);
+            builder.username(this.username)
+                    .password(this.password)
+                    .channel(this.channelId);
 
-            if (twoFactor.length() == 6) {
+            String _twoFactor = this.twoFactor;
+
+            if (twoFactor != null) {
+                _twoFactor = twoFactor;
+            }
+
+            if (_twoFactor != null && _twoFactor.length() == 6) {
                 builder.twoFactor(twoFactor);
             }
 
             try {
                 this.robotInstance = builder.build(beam).get();
             } catch (InterruptedException e) {
+                ChikachiInteractive.Log("Could not open robot connection", true);
+                e.printStackTrace();
                 this.robotInstance = null;
             } catch (ExecutionException e) {
+                ChikachiInteractive.Log("Could not open robot connection", true);
+                e.printStackTrace();
                 this.robotInstance = null;
             }
         }
@@ -122,5 +137,23 @@ public class Game {
 
     public ActionManager getManager() {
         return this.actionManager;
+    }
+
+    public void clearRobotInstance() {
+        if (this.robotInstance == null) {
+            return;
+        }
+
+        if (this.robotInstance.isClosed()) {
+            this.robotInstance = null;
+        } else {
+            try {
+                this.robotInstance.disconnect();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                this.robotInstance = null;
+            }
+        }
     }
 }

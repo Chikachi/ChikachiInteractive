@@ -5,6 +5,7 @@ import chikachi.interactive.common.action.ActionBase;
 import chikachi.lib.common.utils.MapUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 
 import java.util.HashMap;
@@ -36,5 +37,30 @@ public class ActionPlaySound extends ActionBase {
         }
 
         return true;
+    }
+
+    @Override
+    public String getGuiText() {
+        return "Play Sound (" + this.sound + " - " + (this.volume * 100) + "% volume - " + (this.pitch * 100) + " pitch)";
+    }
+
+    @Override
+    public NBTTagCompound toNBT() {
+        NBTTagCompound tagCompound = super.toNBT();
+
+        tagCompound.setString("sound", this.sound);
+        tagCompound.setFloat("volume", this.volume);
+        tagCompound.setFloat("pitch", this.pitch);
+
+        return tagCompound;
+    }
+
+    @Override
+    protected void fromNBT(NBTTagCompound tagCompound) {
+        super.fromNBT(tagCompound);
+
+        this.sound = tagCompound.getString("sound");
+        this.volume = tagCompound.getFloat("volume");
+        this.pitch = tagCompound.getFloat("pitch");
     }
 }

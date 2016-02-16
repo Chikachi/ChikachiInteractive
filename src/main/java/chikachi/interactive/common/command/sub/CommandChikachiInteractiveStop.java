@@ -1,18 +1,18 @@
 package chikachi.interactive.common.command.sub;
 
-import chikachi.interactive.ChikachiInteractive;
 import chikachi.interactive.common.Game;
 import chikachi.interactive.common.action.ActionManager;
 import chikachi.interactive.common.tetris.TetrisForgeConnector;
 import chikachi.lib.common.command.sub.CommandChikachiBasePlayer;
-import chikachi.lib.common.utils.PlayerUtils;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 import pro.beam.interactive.robot.Robot;
 
+import java.io.IOException;
 import java.util.List;
 
 public class CommandChikachiInteractiveStop extends CommandChikachiBasePlayer {
@@ -21,22 +21,18 @@ public class CommandChikachiInteractiveStop extends CommandChikachiBasePlayer {
     }
 
     @Override
-    public void execute(EntityPlayer player, String[] args) {
+    public void execute(EntityPlayerMP player, String[] args) {
         Game game = TetrisForgeConnector.getInstance().getGame(player.getDisplayName());
         Robot robot = game.getRobotInstance();
-        if (robot != null) {
-            if (robot.isConnecting() || robot.isOpen()) {
-                try {
-                    robot.disconnect();
-                    player.addChatMessage(new ChatComponentTranslation("chat.ChikachiInteractive.stop.success"));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    player.addChatMessage(new ChatComponentTranslation("chat.ChikachiInteractive.stop.failed").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.RED)));
-                } finally {
-                    ChikachiInteractive.instance.robot = null;
-                }
-            } else {
-                player.addChatMessage(new ChatComponentTranslation("chat.ChikachiInteractive.stop.notConnected"));
+        if (robot != null && (robot.isConnecting() || robot.isOpen())) {
+            try {
+                robot.disconnect();
+                player.addChatMessage(new ChatComponentTranslation("chat.ChikachiInteractive.stop.success"));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                player.addChatMessage(new ChatComponentTranslation("chat.ChikachiInteractive.stop.failed").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.RED)));
+            } finally {
+                game.clearRobotInstance();
             }
         } else {
             player.addChatMessage(new ChatComponentTranslation("chat.ChikachiInteractive.stop.notConnected"));

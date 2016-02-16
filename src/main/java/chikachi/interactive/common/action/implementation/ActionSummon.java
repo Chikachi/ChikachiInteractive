@@ -18,14 +18,14 @@ import java.util.Random;
 
 public class ActionSummon extends ActionBase {
     private static final Random random = new Random();
-    private String entityName;
+    private String entity;
     private int amount = 1;
     private int radius = 5;
 
     @Override
     public void execute(EntityPlayer entityPlayer) {
         NBTTagCompound nbttagcompound = new NBTTagCompound();
-        nbttagcompound.setString("id", entityName);
+        nbttagcompound.setString("id", entity);
 
         World world = entityPlayer.worldObj;
         Vec3 playerPos = Vec3.createVectorHelper(entityPlayer.posX, entityPlayer.posY, entityPlayer.posZ);
@@ -73,26 +73,51 @@ public class ActionSummon extends ActionBase {
     public boolean setData(HashMap<String, Object> data) {
         MapUtils<String> utils = new MapUtils<String>(data);
 
-        this.entityName = utils.getString("entity");
+        this.entity = utils.getString("entity");
         this.amount = utils.getInteger("amount", 1);
         this.radius = utils.getInteger("radius", 5);
 
-        if (this.entityName == null) {
+        if (this.entity == null) {
             ChikachiInteractive.Log("Missing entity", true);
             return false;
         }
 
         NBTTagCompound nbttagcompound = new NBTTagCompound();
-        nbttagcompound.setString("id", this.entityName);
+        nbttagcompound.setString("id", this.entity);
 
         Entity entity = EntityList.createEntityFromNBT(nbttagcompound, MinecraftServer.getServer().getEntityWorld());
 
         if (entity == null) {
-            ChikachiInteractive.Log(String.format("Invalid EntityName : %s", this.entityName), true);
+            ChikachiInteractive.Log(String.format("Invalid EntityName : %s", this.entity), true);
             return false;
         } else {
             entity.setDead();
             return true;
         }
+    }
+
+    @Override
+    public String getGuiText() {
+        return "Summon Entity (" + this.amount + "x " + this.entity + " within " + this.radius + "m radius)";
+    }
+
+    @Override
+    public NBTTagCompound toNBT() {
+        NBTTagCompound tagCompound = super.toNBT();
+
+        tagCompound.setString("entity", this.entity);
+        tagCompound.setInteger("entity", this.amount);
+        tagCompound.setInteger("entity", this.radius);
+
+        return tagCompound;
+    }
+
+    @Override
+    protected void fromNBT(NBTTagCompound tagCompound) {
+        super.fromNBT(tagCompound);
+
+        this.entity = tagCompound.getString("entity");
+        this.amount = tagCompound.getInteger("amount");
+        this.radius = tagCompound.getInteger("radius");
     }
 }

@@ -1,6 +1,5 @@
 package chikachi.interactive.common.command.sub;
 
-import chikachi.interactive.ChikachiInteractive;
 import chikachi.interactive.common.Game;
 import chikachi.interactive.common.action.ActionManager;
 import chikachi.interactive.common.tetris.ActionDispatchEventListener;
@@ -8,10 +7,12 @@ import chikachi.interactive.common.tetris.TetrisForgeConnector;
 import chikachi.lib.common.command.sub.CommandChikachiBasePlayer;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatComponentTranslation;
 import pro.beam.interactive.net.packet.Protocol;
 import pro.beam.interactive.robot.Robot;
 
+import java.io.IOException;
 import java.util.List;
 
 public class CommandChikachiInteractiveStart extends CommandChikachiBasePlayer {
@@ -20,7 +21,7 @@ public class CommandChikachiInteractiveStart extends CommandChikachiBasePlayer {
     }
 
     @Override
-    public void execute(EntityPlayer player, String[] args) {
+    public void execute(EntityPlayerMP player, String[] args) {
         Game game = TetrisForgeConnector.getInstance().getGame(player.getDisplayName());
         Robot robot = game.getRobotInstance();
 
@@ -37,8 +38,16 @@ public class CommandChikachiInteractiveStart extends CommandChikachiBasePlayer {
             }
         }
 
-        robot = game.getRobot(true);
-        robot.on(Protocol.Report.class, new ActionDispatchEventListener(ChikachiInteractive.instance.manager));
+        String twoFactor = args.length > 0 ? args[0] : null;
+
+        robot = game.getRobot(true, twoFactor);
+        if (robot == null) {
+            player.addChatMessage(new ChatComponentTranslation("chat.ChikachiInteractive.start.failed"));
+            return;
+        }
+
+        robot.on(Protocol.Report.class, new ActionDispatchEventListener(game.getManager()));
+
         player.addChatMessage(new ChatComponentTranslation("chat.ChikachiInteractive.start.success"));
     }
 

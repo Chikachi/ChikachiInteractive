@@ -5,6 +5,7 @@ import chikachi.lib.common.command.sub.CommandChikachiBase;
 import chikachi.lib.common.command.sub.CommandChikachiBasePlayer;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
@@ -21,6 +22,8 @@ public class CommandChikachiInteractive extends CommandChikachiBasePlayer {
         RegisterSubCommandHandler(new CommandChikachiInteractiveStatus());
         RegisterSubCommandHandler(new CommandChikachiInteractiveStop());
         RegisterSubCommandHandler(new CommandChikachiInteractiveTest());
+        RegisterSubCommandHandler(new CommandChikachiInteractiveGui());
+        RegisterSubCommandHandler(new CommandChikachiInteractiveRestart());
     }
 
     public void RegisterSubCommandHandler(CommandChikachiBase handler) {
@@ -33,7 +36,7 @@ public class CommandChikachiInteractive extends CommandChikachiBasePlayer {
     }
 
     @Override
-    public void execute(EntityPlayer sender, String[] args) {
+    public void execute(EntityPlayerMP sender, String[] args) {
         if (args.length > 0) {
             String arg = args[0];
 

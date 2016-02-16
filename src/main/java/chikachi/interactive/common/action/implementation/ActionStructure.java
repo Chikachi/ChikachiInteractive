@@ -42,4 +42,9 @@ public class ActionStructure extends ActionBase {
 
         return false;
     }
+
+    @Override
+    public String getGuiText() {
+        return "Structure";
+    }
 }

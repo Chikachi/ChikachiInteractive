@@ -4,6 +4,7 @@ import chikachi.interactive.ChikachiInteractive;
 import chikachi.interactive.common.action.ActionBasePotion;
 import chikachi.lib.common.utils.MapUtils;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 
@@ -58,5 +59,28 @@ public class ActionRandomPotion extends ActionBasePotion {
         }
 
         return true;
+    }
+
+    @Override
+    public String getGuiText() {
+        return "Give Random Potion Effect (" + (this.usePositive && this.useNegative ? "All effects" : (this.useNegative ? "Negative effects" : "Positive effects")) + " - " + this.duration + " seconds - " + this.amplifier + " amplifier)";
+    }
+
+    @Override
+    public NBTTagCompound toNBT() {
+        NBTTagCompound tagCompound = super.toNBT();
+
+        tagCompound.setBoolean("positive", this.usePositive);
+        tagCompound.setBoolean("negative", this.useNegative);
+
+        return tagCompound;
+    }
+
+    @Override
+    protected void fromNBT(NBTTagCompound tagCompound) {
+        super.fromNBT(tagCompound);
+
+        this.usePositive = tagCompound.getBoolean("positive");
+        this.useNegative = tagCompound.getBoolean("negative");
     }
 }
